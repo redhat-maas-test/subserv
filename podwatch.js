@@ -33,9 +33,9 @@ Subscription.prototype.subscribe = function (selector, handler) {
     var self = this;
     var amqp = rhea.create_container();
     amqp.on('message', handler);
-    var conn = config_service.connect(amqp, "podsense-" + selector.address);
+    var conn = config_service.connect(amqp, "brokersense-" + selector.address);
     if (conn) {
-        conn.open_receiver({source:{address:"podsense", filter:selector}});
+        conn.open_receiver({source:{address:"brokersense", filter:selector}});
     }
 }
 
