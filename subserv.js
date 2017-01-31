@@ -38,22 +38,26 @@ function is_topic (address) {
 }
 
 function addresses_updated(addresses) {
-    for (var name in addresses) {
-        var address = addresses[name];
-        if (is_topic(address)) {
-            var topic = topics[name];
-            if (topic === undefined) {
-                console.log('starting to watch pods for topic ' + name);
-                topic = create_topic(name);
-                topic.watch_pods();
-                topics[name] = topic;
-            } else {
-                console.log('already watching pods for topic ' + name);
+    var flattened = {};
+    for (var group in addresses) {
+        for (var name in addresses[group]) {
+            var address = addresses[group][name];
+            flattened[name] = address;
+            if (is_topic(address)) {
+                var topic = topics[name];
+                if (topic === undefined) {
+                    console.log('starting to watch pods for topic ' + name);
+                    topic = create_topic(name);
+                    topic.watch_pods();
+                    topics[name] = topic;
+                } else {
+                    console.log('already watching pods for topic ' + name);
+                }
             }
         }
     }
     for (var name in topics) {
-        var address = addresses[name];
+        var address = flattened[name];
         if (address === undefined || !is_topic(address)) {
             topics[name].close();
             delete topics[name];
