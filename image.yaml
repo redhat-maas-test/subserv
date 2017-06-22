@@ -1,0 +1,28 @@
+version: 1.0
+name: jboss-amqmaas-1-tech-preview/amqmaas10-subscriptionservice-openshift
+from: jboss/base-rhel7:1.0
+user: 185
+dogen:
+    version: "2.0.1"
+    ssl_verify: false
+cmd:
+    - "node"
+    - "/opt/app-root/src/subserv.js"
+packages:
+    - npm
+    - nodejs
+
+sources:
+    - artifact: subserv-latest.tar.gz
+           
+scripts:    
+    - package: subscription-service
+      exec: install
+
+envs:
+    - name: "NODE_PATH"
+      value: "/usr/lib/node_modules"
+    - name: "DISTRO_NAME"
+      value: "subserv-latest"
+ports:
+    - value: 5672

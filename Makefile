@@ -1,3 +1,9 @@
+IMAGE_FILE?=image.yaml
+COMMIT?=$(shell git rev-parse HEAD | cut -c1-8)
+IMAGE_VERSION?=latest
+REPO?=$(shell cat $(IMAGE_FILE) | grep "^name:" | cut -d' ' -f2)
+DOCKER_BUILD_OPTS?=
+DOCKER?=docker
 TAG?=latest
 
 ifdef TRAVIS_TAG
@@ -7,5 +13,23 @@ endif
 all:
 	tar -czf subserv-$(TAG).tar.gz *.js
 
+build:
+	echo "Running docker build $(REPO)"
+	mkdir -p $(CURDIR)/build
+	cp -r $(CURDIR)/*.tar.gz $(CURDIR)/build/
+	dogen --repo-files-dir $(YUM_REPO_DIR) --scripts $(CURDIR)/scripts --verbose $(IMAGE_FILE) $(CURDIR)/build
+	$(DOCKER) build $(DOCKER_BUILD_OPTS) -t $(REPO):$(COMMIT) $(CURDIR)/build
+
+push:
+	$(DOCKER) tag $(REPO):$(COMMIT) $(DOCKER_REGISTRY)/$(REPO):$(COMMIT)
+	$(DOCKER) push $(DOCKER_REGISTRY)/$(REPO):$(COMMIT)
+
+snapshot:
+	$(DOCKER) tag $(REPO):$(COMMIT) $(DOCKER_REGISTRY)/$(REPO):$(IMAGE_VERSION)
+	$(DOCKER) push $(DOCKER_REGISTRY)/$(REPO):$(IMAGE_VERSION)
+
+
 clean:
-	rm -rf subserv-$(TAG).tar.gz
+	rm -rf build subserv-$(TAG).tar.gz
+
+.PHONY: build push snapshot clean
