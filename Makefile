@@ -5,6 +5,8 @@ REPO?=$(shell cat $(IMAGE_FILE) | grep "^name:" | cut -d' ' -f2)
 DOCKER_BUILD_OPTS?=
 DOCKER?=docker
 TAG?=latest
+SCRIPTS?=../scripts
+YUM_REPO_DIR?=../repos
 
 ifdef TRAVIS_TAG
 	TAG=$(TRAVIS_TAG)
@@ -17,7 +19,7 @@ build:
 	echo "Running docker build $(REPO)"
 	mkdir -p $(CURDIR)/build
 	cp -r $(CURDIR)/*.tar.gz $(CURDIR)/build/
-	dogen --repo-files-dir $(YUM_REPO_DIR) --scripts $(CURDIR)/scripts --verbose $(IMAGE_FILE) $(CURDIR)/build
+	dogen --repo-files-dir $(YUM_REPO_DIR) --scripts $(SCRIPTS) --verbose $(IMAGE_FILE) $(CURDIR)/build
 	$(DOCKER) build $(DOCKER_BUILD_OPTS) -t $(REPO):$(COMMIT) $(CURDIR)/build
 
 push:
